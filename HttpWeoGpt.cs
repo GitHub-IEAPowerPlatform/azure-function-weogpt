@@ -1,7 +1,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Agents.Client;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,28 +24,47 @@ public class HttpWeoGptAgentTool
 
     [Function("HttpWeoGptAgentTool")]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
     {
-        _logger.LogInformation("🔧 Agent tool function triggered.");
+        _logger.LogInformation("🔧 HttpWeoGptAgentTool function triggered.");
 
-        var tokenObject = await FetchTokenAsync();
-        var response = req.CreateResponse(HttpStatusCode.OK);
+        var response = req.CreateResponse();
 
-        if (tokenObject != null)
+        try
         {
-            tokenObject["expires_in"] = 1800;
-            var result = new ToolCallResult
+            var tokenObject = await FetchTokenAsync();
+
+            if (tokenObject != null)
             {
-                Value = tokenObject.ToString(),
-                CorrelationId = Guid.NewGuid().ToString()
-            };
+                tokenObject["expires_in"] = 1800;
 
-            await response.WriteAsJsonAsync(result);
+                response.StatusCode = HttpStatusCode.OK;
+                await response.WriteStringAsync(tokenObject.ToString());
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ Token response was null.");
+                response.StatusCode = HttpStatusCode.InternalServerError;
+                await response.WriteStringAsync("Token fetch failed.");
+            }
         }
-        else
+        catch (HttpRequestException ex)
         {
-            _logger.LogWarning("⚠️ Token response was null.");
+            _logger.LogError($"❌ HTTP error: {ex.Message}");
             response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteStringAsync("HTTP request failed.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError($"⏱️ Request timeout: {ex.Message}");
+            response.StatusCode = HttpStatusCode.RequestTimeout;
+            await response.WriteStringAsync("Request timed out.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"💥 Unexpected error: {ex.Message}");
+            response.StatusCode = HttpStatusCode.InternalServerError;
+            await response.WriteStringAsync("Unexpected error occurred.");
         }
 
         return response;
@@ -65,26 +84,37 @@ public class HttpWeoGptAgentTool
                 if (response.IsSuccessStatusCode)
                 {
                     var tokenResponse = await response.Content.ReadAsStringAsync();
-                    return JObject.Parse(tokenResponse);
+                    var tokenObject = JsonConvert.DeserializeObject<JObject>(tokenResponse);
+
+                    if (tokenObject != null)
+                    {
+                        return tokenObject;
+                    }
+
+                    _logger.LogError("❗ Token response was empty.");
+                    return null;
                 }
 
                 _logger.LogError($"⚠️ Token endpoint responded with status code: {response.StatusCode}");
                 return null;
             }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError($"🔁 Retry {retryCount + 1}: HTTP error - {ex.Message}");
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError($"🔁 Retry {retryCount + 1}: Timeout - {ex.Message}");
+            }
             catch (Exception ex)
             {
-                _logger.LogError($"🔁 Retry {retryCount + 1}: {ex.Message}");
-                retryCount++;
-                await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
+                _logger.LogError($"🔁 Retry {retryCount + 1}: Unexpected error - {ex.Message}");
             }
+
+            retryCount++;
+            await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryCount))); // Exponential backoff
         }
 
         return null;
-    }
-
-    public class ToolCallResult
-    {
-        public required string Value { get; set; }
-        public required string CorrelationId { get; set; }
     }
 }
