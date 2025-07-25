@@ -1,10 +1,10 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace WeoGpt.Function;
@@ -36,10 +36,16 @@ public class HttpWeoGptAgentTool
 
             if (tokenObject != null)
             {
-                tokenObject["expires_in"] = 1800;
+                tokenObject.ExpiresIn = 1800;
+
+                var json = JsonSerializer.Serialize(tokenObject, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
 
                 response.StatusCode = HttpStatusCode.OK;
-                await response.WriteStringAsync(tokenObject.ToString());
+                await response.WriteStringAsync(json);
             }
             else
             {
@@ -70,7 +76,7 @@ public class HttpWeoGptAgentTool
         return response;
     }
 
-    private async Task<JObject?> FetchTokenAsync()
+    private async Task<DirectLineTokenResponse?> FetchTokenAsync()
     {
         string tokenEndPoint = "https://1c30aed158d94c96a7128ab2269f56.d2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview";
         int maxRetries = 3;
@@ -84,7 +90,7 @@ public class HttpWeoGptAgentTool
                 if (response.IsSuccessStatusCode)
                 {
                     var tokenResponse = await response.Content.ReadAsStringAsync();
-                    var tokenObject = JsonConvert.DeserializeObject<JObject>(tokenResponse);
+                    var tokenObject = JsonSerializer.Deserialize<DirectLineTokenResponse>(tokenResponse);
 
                     if (tokenObject != null)
                     {
@@ -117,4 +123,16 @@ public class HttpWeoGptAgentTool
 
         return null;
     }
+}
+
+public class DirectLineTokenResponse
+{
+    [JsonPropertyName("conversationId")]
+    public string? ConversationId { get; set; }
+
+    [JsonPropertyName("token")]
+    public string? Token { get; set; }
+
+    [JsonPropertyName("expires_in")]
+    public int ExpiresIn { get; set; }
 }
