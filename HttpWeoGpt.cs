@@ -21,7 +21,7 @@ public class HttpWeoGptAgentTool
     {
         _logger = logger;
     }
-
+     //https://vscode-iea-weogpt-hmfbg4bha7fzc2bx.francecentral-01.azurewebsites.net/api/HttpWeoGptAgentTool?
     [Function("HttpWeoGptAgentTool")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
