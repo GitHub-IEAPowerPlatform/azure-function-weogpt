@@ -19,7 +19,7 @@ public class HttpWeoGptAgentTool
     {
         _logger = logger;
     }
-     //Azure Function URL: https://vscode-iea-weogpt-hmfbg4bha7fzc2bx.francecentral-01.azurewebsites.net/api/HttpWeoGptAgentTool?
+    //Azure Function URL: https://vscode-iea-weogpt-hmfbg4bha7fzc2bx.francecentral-01.azurewebsites.net/api/HttpWeoGptAgentTool?
     [Function("HttpWeoGptAgentTool")]
     public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
     {
@@ -77,10 +77,11 @@ public class HttpWeoGptAgentTool
     {
         //Copilot Studio Project Infos:
         //Solution Name: WEO-Agent-Gen Solution, 
-        //Agent Name: WEO GPT 2024 - Generative AI 
+        //Agent Name: WEO GPT 2024 - Generative AI
+        //DEV Token Endpoint: "https://54c679c972ae481a87ef70138e041d.e2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview"  
         //UAT Token  Endpoint: "https://1c30aed158d94c96a7128ab2269f56.d2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview";
         //PROD Token Endpoint: "https://bc1cc217c7794ddb9683cfc02bb30a.9d.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview"
-        
+
         string tokenEndPoint = "https://1c30aed158d94c96a7128ab2269f56.d2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview";
 
         int maxRetries = 3;
