@@ -76,7 +76,7 @@ public class HttpWeoGptDEV
     private async Task<DirectLineTokenResponse?> FetchTokenAsync()
     {
         //Copilot Studio Project Infos:
-        // https://www.youtube.com/watch?v=lpZCwzYVNpA
+        //https://www.youtube.com/watch?v=lpZCwzYVNpA
         //Solution Name: WEO-Agent-Gen Solution, 
         //Agent Name: WEO GPT 2024 - Generative AI
         //DEV Token Endpoint: "https://54c679c972ae481a87ef70138e041d.e2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview"  
