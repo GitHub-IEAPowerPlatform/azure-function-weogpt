@@ -75,6 +75,7 @@ public class HttpWeoGptAgentTool
 
     private async Task<DirectLineTokenResponse?> FetchTokenAsync()
     {
+        //Press F1 Key to deploy to Azure.
         //Copilot Studio Project Infos:
         //Solution Name: WEO-Agent-Gen Solution, 
         //https://www.youtube.com/watch?v=lpZCwzYVNpA
