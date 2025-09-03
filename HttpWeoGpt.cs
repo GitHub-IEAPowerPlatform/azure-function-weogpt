@@ -77,6 +77,7 @@ public class HttpWeoGptAgentTool
     {
         //Copilot Studio Project Infos:
         //Solution Name: WEO-Agent-Gen Solution, 
+        //https://www.youtube.com/watch?v=lpZCwzYVNpA
         //Agent Name: WEO GPT 2024 - Generative AI
         //DEV Token Endpoint: "https://54c679c972ae481a87ef70138e041d.e2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview"  
         //UAT Token  Endpoint: "https://1c30aed158d94c96a7128ab2269f56.d2.environment.api.powerplatform.com/powervirtualagents/botsbyschema/iea_weoGpt2024Advanced/directline/token?api-version=2022-03-01-preview";
